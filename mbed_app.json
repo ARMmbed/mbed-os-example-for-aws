@@ -1,0 +1,26 @@
+{
+    "config": {
+        "wifi-ssid": {
+            "help": "WiFi SSID",
+            "value": "\"SSID\""
+        },
+        "wifi-password": {
+            "help": "WiFi Password",
+            "value": "\"PASSWORD\""
+        }
+    },
+    "macros": [
+        "ENABLE_IOT_INFO",
+        "ENABLE_IOT_WARN",
+        "ENABLE_IOT_ERROR"
+    ],
+    "target_overrides": {
+        "*": {
+            "mbed-trace.enable": false,
+            "rtos.main-thread-stack-size": 8192,
+            "platform.error-filename-capture-enabled": true,
+            "platform.stdio-convert-newlines": true,
+            "platform.stdio-baud-rate": 115200 
+        }
+    }
+}

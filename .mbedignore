@@ -1,0 +1,3 @@
+aws-iot-device-sdk-embedded-c/tests/*
+aws-iot-device-sdk-embedded-c/samples/*
+aws-iot-device-sdk-embedded-c/platform/linux/*
