@@ -1,0 +1,34 @@
+{
+    "config": {
+        "wifi-ssid": {
+            "help": "WiFi SSID",
+            "value": "\"SSID\""
+        },
+        "wifi-password": {
+            "help": "WiFi Password",
+            "value": "\"PASSWORD\""
+        },
+        "aws-endpoint": {
+            "help": "Endpoint name",
+            "value": "\"???.iot.us-west-2.amazonaws.com\""
+        },
+        "aws-mqtt-topic": {
+            "help": "Topic to subscribe & publish to",
+            "value": "\"sdkTest/sub\""
+        },
+        "aws-client-identifier": {
+            "help": "uniq id for this thing",
+            "value": "\"...\""
+        }
+    },
+    "target_overrides": {
+        "*": {
+            "mbed-trace.enable": true,
+            "aws-client.log-puts": "synchronized_log",
+            "rtos.main-thread-stack-size": 8192,
+            "platform.error-filename-capture-enabled": true,
+            "platform.stdio-convert-newlines": true,
+            "platform.stdio-baud-rate": 115200
+        }
+    }
+}
