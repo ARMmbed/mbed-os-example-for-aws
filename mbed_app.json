@@ -1,16 +1,8 @@
 {
     "config": {
-        "wifi-ssid": {
-            "help": "WiFi SSID",
-            "value": "\"SSID\""
-        },
-        "wifi-password": {
-            "help": "WiFi Password",
-            "value": "\"PASSWORD\""
-        },
         "aws-endpoint": {
             "help": "Endpoint name",
-            "value": "\"???.iot.us-west-2.amazonaws.com\""
+            "value": "\"… .iot. … .amazonaws.com\""
         },
         "aws-mqtt-topic": {
             "help": "Topic to subscribe & publish to",
@@ -24,11 +16,19 @@
     "target_overrides": {
         "*": {
             "mbed-trace.enable": true,
-            "aws-client.log-puts": "synchronized_log",
+            "mbed-trace.max-level": "TRACE_LEVEL_INFO",
+            "aws-client.log-puts": "aws_iot_puts",
+            "aws-client.log-level-global": "IOT_LOG_DEBUG",
             "rtos.main-thread-stack-size": 8192,
             "platform.error-filename-capture-enabled": true,
             "platform.stdio-convert-newlines": true,
             "platform.stdio-baud-rate": 115200
+        },
+        "DISCO_L475VG_IOT01A": {
+            "target.network-default-interface-type": "WIFI",
+            "nsapi.default-wifi-security": "WPA_WPA2",
+            "nsapi.default-wifi-ssid": "\"SSID\"",
+            "nsapi.default-wifi-password": "\"PASSWORD\""
         }
     }
 }

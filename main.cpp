@@ -10,30 +10,26 @@ extern "C" {
 #include "iot_mqtt.h"
 }
 
+// debugging facilities
 #define TRACE_GROUP "Main"
-
-#if TARGET_DISCO_L475VG_IOT01A
-NetworkInterface *NetworkInterface::get_default_instance() {
-    return WiFiInterface::get_default_instance();
-}
-#endif
 static Mutex trace_mutex;
-static void my_mutex_wait()
+static void trace_mutex_lock()
 {
     trace_mutex.lock();
 }
-static void my_mutex_release()
+static void trace_mutex_unlock()
 {
     trace_mutex.unlock();
 }
-extern "C" void synchronized_log(const char *msg) {
-    my_mutex_wait();
+extern "C" void aws_iot_puts(const char *msg) {
+    trace_mutex_lock();
     puts(msg);
-    my_mutex_release();
+    trace_mutex_unlock();
 }
 
 #define MQTT_TIMEOUT_MS    15000
 
+// subscription event handler
 static void on_message_received(void * pCallbackContext, IotMqttCallbackParam_t *pCallbackParam) {
     auto wait_sem = static_cast<Semaphore*>(pCallbackContext);
     char* payload = (char*)pCallbackParam->u.message.info.pPayload;
@@ -47,47 +43,34 @@ static void on_message_received(void * pCallbackContext, IotMqttCallbackParam_t 
 }
 int main()
 {
-    mbed_trace_mutex_wait_function_set( my_mutex_wait ); // only if thread safety is needed
-    mbed_trace_mutex_release_function_set( my_mutex_release ); // only if thread safety is needed
+    mbed_trace_mutex_wait_function_set( trace_mutex_lock ); // only if thread safety is needed
+    mbed_trace_mutex_release_function_set( trace_mutex_unlock ); // only if thread safety is needed
     mbed_trace_init();
 
-#if TARGET_DISCO_L475VG_IOT01A
-    WiFiInterface *wifi = WiFiInterface::get_default_instance();
-    if (!wifi) {
-        tr_error("No WiFiInterface found.");
-        return -1;
-    }
-
-    tr_info("Connecting to %s...", MBED_CONF_APP_WIFI_SSID);
-    int ret = wifi->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
-    tr_info("MAC: %s", wifi->get_mac_address());
-#else
-    tr_info("Connecting to ethernet...");
+    tr_info("Connecting to the network...");
     auto eth = NetworkInterface::get_default_instance();
     if (eth == NULL) {
-        tr_error("No NetworkInterface found.");
+        tr_error("No Network interface found.");
         return -1;
     }
-    int ret = eth->connect();
-    tr_info("MAC: %s", eth->get_mac_address());
-#endif
+    auto ret = eth->connect();
     if (ret != 0) {
         tr_error("Connection error: %x", ret);
         return -1;
     }
-
+    tr_info("MAC: %s", eth->get_mac_address());
     tr_info("Connection Success");
 
     // demo :
     // - Init sdk
     if (!IotSdk_Init()) {
         tr_error("AWS Sdk: failed to initialize IotSdk");
-        while(true);
+        return -1;
     }
     auto init_status = IotMqtt_Init();
     if (init_status != IOT_MQTT_SUCCESS) {
         tr_error("AWS Sdk: Failed to initialize IotMqtt with %u", init_status);
-        while(true);
+        return -1;
     }
     // - Connect to mqtt broker
     IotMqttNetworkInfo_t network_info = IOT_MQTT_NETWORK_INFO_INITIALIZER;
@@ -113,7 +96,7 @@ int main()
     auto connect_status = IotMqtt_Connect(&network_info, &connect_info, /* timeout ms */ MQTT_TIMEOUT_MS, &connection);
     if (connect_status != IOT_MQTT_SUCCESS) {
         tr_error("AWS Sdk: Connection to the MQTT broker failed with %u", connect_status);
-        while(true);
+        return -1;
     }
     // - Subscribe to sdkTest/sub
     //   On message
@@ -161,6 +144,7 @@ int main()
         publish.payloadLength = strlen(message);
 
         /* Publish the message. */
+        tr_info("sending warning message: %s", message);
         auto pub_status = IotMqtt_PublishSync(connection, &publish,
                                               /* flags */ 0, /* timeout ms */ MQTT_TIMEOUT_MS);
         if (pub_status != IOT_MQTT_SUCCESS) {
