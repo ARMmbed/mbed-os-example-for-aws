@@ -20,6 +20,7 @@
             "aws-client.log-puts": "aws_iot_puts",
             "aws-client.log-level-global": "IOT_LOG_DEBUG",
             "rtos.main-thread-stack-size": 8192,
+            "rtos.thread-stack-size": 2048,
             "platform.error-filename-capture-enabled": true,
             "platform.stdio-convert-newlines": true,
             "platform.stdio-baud-rate": 115200
