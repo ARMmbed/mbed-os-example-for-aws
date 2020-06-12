@@ -139,7 +139,7 @@ int main()
 
         /* prepare the message */
         static char message[64];
-        snprintf(message, 64, "Warning: Only %lu seconde(s) left to say your name !", 10 - i);
+        snprintf(message, 64, "Warning: Only %lu second(s) left to say your name !", 10 - i);
         publish.pPayload = message;
         publish.payloadLength = strlen(message);
 
