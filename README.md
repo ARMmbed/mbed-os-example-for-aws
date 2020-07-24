@@ -60,7 +60,7 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
 
 1. <a name="build_cmd"></a> Run the following command to build the example project, program the microcontroller flash memory, and open a serial terminal:
     ```
-    $ mbed compile -m detect -t <TOOLCHAIN> --flash --sterm
+    $ mbed compile -m detect -t <TOOLCHAIN> --flash --sterm --baud 115200
     ```
 
 Alternatively, you can manually copy the binary to the board, which you mount on the host computer over USB.
@@ -74,7 +74,7 @@ $ mbed compile -S
 
 ## Expected output
 
-Once the example starts to run, you can [monitor a serial terminal](https://os.mbed.com/docs/mbed-os/v6.0/tutorials/serial-comm.html) to see that the device connects to your network, exchanges some TLS handshakes, connects to AWS and publishes to the topic you just subscribed. This can be seen on the AWS console as incoming messages.
+Once the example starts to run, you can [monitor a serial terminal](https://os.mbed.com/docs/mbed-os/latest/tutorials/serial-comm.html) to see that the device connects to your network, exchanges some TLS handshakes, connects to AWS and publishes to the topic you just subscribed. This can be seen on the AWS console as incoming messages.
 
 The application publishes a message every second for 10 seconds, or until it receives a message from the cloud:
 ```
@@ -98,7 +98,7 @@ If you have problems, you can review the [documentation](https://os.mbed.com/doc
 * [Mbed OS Serial Communication](https://os.mbed.com/docs/latest/tutorials/serial-communication.html).
 * [Mbed OS bare metal](https://os.mbed.com/docs/mbed-os/latest/reference/mbed-os-bare-metal.html).
 * [Mbed boards](https://os.mbed.com/platforms/).
-* [AWS IoT Core](https://aws.amazon.com/fr/iot-core/)
+* [AWS IoT Core](https://aws.amazon.com/iot-core/)
 * [AWS IoT Core - Embedded C SDK](https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/v4_beta)
 
 ### License and contributions
