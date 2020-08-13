@@ -101,7 +101,6 @@ def main():
 
     print("Generating C-style header from given credentials...")
 
-    global default_out_file_name
     global header_template
     out_file_name = default_out_file_name
     if args.output_file:
