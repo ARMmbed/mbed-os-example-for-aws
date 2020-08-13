@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 from os import walk
 
@@ -6,53 +8,55 @@ from os import walk
 # and to double-up brackets ('{' and '}' become '{{' and '}}') or else
 # formatting of the template string will fail
 header_template = (
-    '// AWS Certificates\n'
-    '\n'
-    '#ifndef AWS_CREDENTIALS_H\n'
-    '#define AWS_CREDENTIALS_H\n'
-    '\n'
-    'namespace aws {{\n'
-    'namespace credentials {{\n'
-    '/*\n'
-    ' * PEM-encoded root CA certificate\n'
-    ' *\n'
-    ' * Must include the PEM header and footer,\n'
-    ' * and every line of the body needs to be quoted and end with \\n:\n'
-    ' * "-----BEGIN CERTIFICATE-----\\n"\n'
-    ' * "...base64 data...\\n"\n'
-    ' * "-----END CERTIFICATE-----";\n'
-    ' */\n'
-    'const char rootCA[] = \n'
-    '{0};\n'
-    '\n'
-    '/*\n'
-    ' * PEM-encoded client certificate\n'
-    ' *\n'
-    ' * Must include the PEM header and footer,\n'
-    ' * and every line of the body needs to be quoted and end with \\n:\n'
-    ' * "-----BEGIN CERTIFICATE-----\\n"\n'
-    ' * "...base64 data...\\n"\n'
-    ' * "-----END CERTIFICATE-----";\n'
-    ' */\n'
-    'const char clientCrt[] = \n'
-    '{1};\n'
-    '\n'
-    '/*\n'
-    ' * PEM-encoded client private key.\n'
-    ' *\n'
-    ' * Must include the PEM header and footer,\n'
-    ' * and every line of the body needs to be quoted and end with \\n:\n'
-    ' * "-----BEGIN RSA PRIVATE KEY-----\\n"\n'
-    ' * "...base64 data...\\n"\n'
-    ' * "-----END RSA PRIVATE KEY-----";\n'
-    ' */\n'
-    'const char clientKey[] = \n'
-    '{2};\n'
-    '\n'
-    '}}\n'
-    '}}\n'
-    '\n'
-    '#endif\n'
+    """
+// AWS Certificates
+
+#ifndef AWS_CREDENTIALS_H
+#define AWS_CREDENTIALS_H
+
+namespace aws {{
+namespace credentials {{
+/*
+ * PEM-encoded root CA certificate
+ *
+ * Must include the PEM header and footer,
+ * and every line of the body needs to be quoted and end with \\n:
+ * "-----BEGIN CERTIFICATE-----\\n"
+ * "...base64 data...\\n"
+ * "-----END CERTIFICATE-----";
+ */
+const char rootCA[] = 
+{0};
+
+/*
+ * PEM-encoded client certificate
+ *
+ * Must include the PEM header and footer,
+ * and every line of the body needs to be quoted and end with \\n:
+ * "-----BEGIN CERTIFICATE-----\\n"
+ * "...base64 data...\\n"
+ * "-----END CERTIFICATE-----";
+ */
+const char clientCrt[] = 
+{1};
+
+/*
+ * PEM-encoded client private key.
+ *
+ * Must include the PEM header and footer,
+ * and every line of the body needs to be quoted and end with \\n:
+ * "-----BEGIN RSA PRIVATE KEY-----\\n"
+ * "...base64 data...\\n"
+ * "-----END RSA PRIVATE KEY-----";
+ */
+const char clientKey[] = 
+{2};
+
+}}
+}}
+
+#endif
+    """
 )
 
 default_out_file_name = "aws_credentials.h"
@@ -89,11 +93,11 @@ def main():
     client_key_file = None
     for cert_file in f:
         if "AmazonRootCA" in cert_file:
-            root_ca_file = args.certs_directory + cert_file
+            root_ca_file = args.certs_directory + "/" + cert_file
         elif ".pem.crt" in cert_file:
-            client_crt_file = args.certs_directory + cert_file
+            client_crt_file = args.certs_directory + "/" + cert_file
         elif "private.pem.key" in cert_file:
-            client_key_file = args.certs_directory + cert_file
+            client_key_file = args.certs_directory + "/" + cert_file
 
     if root_ca_file:
         print("Root CA file found: {}".format(root_ca_file))
