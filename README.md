@@ -60,7 +60,7 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
 
 1. <a name="build_cmd"></a> Run the following command to build the example project, program the microcontroller flash memory, and open a serial terminal:
     ```
-    $ mbed compile -m detect -t <TOOLCHAIN> --flash --sterm
+    $ mbed compile -m detect -t <TOOLCHAIN> --flash --sterm --baud 115200
     ```
 
 Alternatively, you can manually copy the binary to the board, which you mount on the host computer over USB.
@@ -98,7 +98,7 @@ If you have problems, you can review the [documentation](https://os.mbed.com/doc
 * [Mbed OS Serial Communication](https://os.mbed.com/docs/latest/tutorials/serial-communication.html).
 * [Mbed OS bare metal](https://os.mbed.com/docs/mbed-os/latest/reference/mbed-os-bare-metal.html).
 * [Mbed boards](https://os.mbed.com/platforms/).
-* [AWS IoT Core](https://aws.amazon.com/fr/iot-core/)
+* [AWS IoT Core](https://aws.amazon.com/iot-core/)
 * [AWS IoT Core - Embedded C SDK](https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/v4_beta)
 
 ### License and contributions
