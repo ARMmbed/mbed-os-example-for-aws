@@ -30,6 +30,23 @@
             "nsapi.default-wifi-security": "WPA_WPA2",
             "nsapi.default-wifi-ssid": "\"SSID\"",
             "nsapi.default-wifi-password": "\"PASSWORD\""
+        },
+        "EP_AGORA": {
+            "platform.stdio-buffered-serial"            : true,
+            "platform.stdio-flush-at-exit"              : true,
+            "drivers.uart-serial-rxbuf-size"            : 1024,
+            "drivers.uart-serial-txbuf-size"            : 1024,
+            "lwip.ipv4-enabled"                         : true,
+            "lwip.ipv6-enabled"                         : true,
+            "lwip.ppp-enabled"                          : true,
+            "lwip.tcp-enabled"                          : true,
+            "lwip.ethernet-enabled"                     : false,
+            "lwip.mem-size"                             : 22000,
+            "lwip.tcpip-thread-stacksize"               : 2000,
+            "nsapi.dns-response-wait-time"              : 30000,
+            "nsapi.default-cellular-apn"                : "\"phone\"",
+            "lwip.use-mbed-trace"                       : true,
+            "lwip.debug-enabled"                        : false
         }
     }
 }
