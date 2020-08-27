@@ -74,7 +74,7 @@ def main():
     client_crt_file = None
     client_key_file = None
     for cert_file in f:
-        if "AmazonRootCA" in cert_file:
+        if "root" in cert_file.lower():
             root_ca_file = args.certs_directory + "/" + cert_file
         elif ".pem.crt" in cert_file:
             client_crt_file = args.certs_directory + "/" + cert_file
