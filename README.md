@@ -1,6 +1,6 @@
 ![](./resources/official_armmbed_example_badge.png)
 
-# AWS Mbed OS example
+# Mbed OS example for AWS cloud
 
 The example project is part of the [Arm Mbed OS Official Examples](https://os.mbed.com/code/). It contains an application that connects to an AWS MQTT broker and publishes a message every 1 second for 10 seconds or until a message is received.
 
@@ -13,14 +13,14 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
 1. Clone this repository on your system, and change the current directory to where the project was cloned:
 
     ```
-    $ git clone git@github.com:armmbed/mbed-os-example-aws && cd mbed-os-example-aws
+    $ git clone https://github.com/ARMmbed/mbed-os-example-for-aws.git && cd mbed-os-example-for-aws
     $ mbed deploy
     ```
 
     Alternatively, you can download the example project with Arm Mbed CLI using the `import` subcommand:
 
     ```
-    $ mbed import mbed-os-example-aws && cd mbed-os-example-aws
+    $ mbed import mbed-os-example-for-aws && cd mbed-os-example-for-aws
     ```
 
 
@@ -64,7 +64,7 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
     ```
 
 Alternatively, you can manually copy the binary to the board, which you mount on the host computer over USB.
-The binary is located at `./BUILD/<TARGET>/<TOOLCHAIN>/mbed-os-example-aws.bin`.
+The binary is located at `./BUILD/<TARGET>/<TOOLCHAIN>/mbed-os-example-for-aws.bin`.
 
 Depending on the target, you can build the example project with the `GCC_ARM` or `ARM` toolchain. Run the command below to determine which toolchain supports your target:
 
