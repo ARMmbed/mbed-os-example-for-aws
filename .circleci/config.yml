@@ -10,9 +10,9 @@ jobs:
     working_directory: ~
     steps:
       - checkout:
-          path: mbed-os-example-aws
+          path: mbed-os-example-for-aws
       - run: |
-          cd mbed-os-example-aws
+          cd mbed-os-example-for-aws
           mbed deploy
           mbed compile -t GCC_ARM -m K64F
 
