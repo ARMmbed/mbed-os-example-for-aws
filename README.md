@@ -44,7 +44,9 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
     
     Then, you can run the script to automatically generate the necessary code from the credentials:
     
-    `python aws-cert-converter.py aws-credentials`
+    ```
+    python aws-cert-converter.py aws-credentials
+    ```
     
     For more details on how to use the convert script, simply pass in the `-h` flag to print the help documentation.
     
