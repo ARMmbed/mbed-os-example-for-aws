@@ -39,6 +39,18 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
     Also download "Amazon Root CA 1" from [here](https://docs.aws.amazon.com/iot/latest/developerguide/server-authentication.html#server-authentication-certs).
 
     Once you have downloaded the credentials, you will need to place them in the [`aws_credentials.h`](./aws_credentials.h) file of this example.
+    
+    The example includes a python script to automate converting the credentials you downloaded from AWS into C-compatible arrays/strings. First, create a new folder in the project to store your credential files, eg: `mkdir aws-credentials`. Copy the previously-downloaded credential files into this subdirectory.
+    
+    Then, you can run the script to automatically generate the necessary code from the credentials:
+    
+    ```
+    python aws-cert-converter.py aws-credentials
+    ```
+    
+    For more details on how to use the convert script, simply pass in the `-h` flag to print the help documentation.
+    
+    The above command will read your credential files and place them into a C header file for you: `aws_credentials.h`
 
 1. Once you have created the "thing", you will need to obtain the custom endpoint name from the console. At the time of writing this document, you can find it under "Settings" in the IoT console.
 
