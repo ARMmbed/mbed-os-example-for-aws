@@ -1,4 +1,9 @@
-// AWS Certificates
+/*
+ * AWS Certificates
+ * Copyright (c) 2020 Arm Limited
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 
 #ifndef AWS_CREDENTIALS_H
 #define AWS_CREDENTIALS_H
