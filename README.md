@@ -1,6 +1,6 @@
 ![](./resources/official_armmbed_example_badge.png)
 
-# AWS Mbed OS example
+# Mbed OS example for AWS cloud
 
 The example project is part of the [Arm Mbed OS Official Examples](https://os.mbed.com/code/). It contains an application that connects to an AWS MQTT broker and publishes a message every 1 second for 10 seconds or until a message is received.
 
@@ -13,14 +13,14 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
 1. Clone this repository on your system, and change the current directory to where the project was cloned:
 
     ```
-    $ git clone git@github.com:armmbed/mbed-os-example-aws && cd mbed-os-example-aws
+    $ git clone https://github.com/ARMmbed/mbed-os-example-for-aws.git && cd mbed-os-example-for-aws
     $ mbed deploy
     ```
 
     Alternatively, you can download the example project with Arm Mbed CLI using the `import` subcommand:
 
     ```
-    $ mbed import mbed-os-example-aws && cd mbed-os-example-aws
+    $ mbed import mbed-os-example-for-aws && cd mbed-os-example-for-aws
     ```
 
 
@@ -39,6 +39,18 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
     Also download "Amazon Root CA 1" from [here](https://docs.aws.amazon.com/iot/latest/developerguide/server-authentication.html#server-authentication-certs).
 
     Once you have downloaded the credentials, you will need to place them in the [`aws_credentials.h`](./aws_credentials.h) file of this example.
+    
+    The example includes a python script to automate converting the credentials you downloaded from AWS into C-compatible arrays/strings. First, create a new folder in the project to store your credential files, eg: `mkdir aws-credentials`. Copy the previously-downloaded credential files into this subdirectory.
+    
+    Then, you can run the script to automatically generate the necessary code from the credentials:
+    
+    ```
+    python aws-cert-converter.py aws-credentials
+    ```
+    
+    For more details on how to use the convert script, simply pass in the `-h` flag to print the help documentation.
+    
+    The above command will read your credential files and place them into a C header file for you: `aws_credentials.h`
 
 1. Once you have created the "thing", you will need to obtain the custom endpoint name from the console. At the time of writing this document, you can find it under "Settings" in the IoT console.
 
@@ -64,7 +76,7 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
     ```
 
 Alternatively, you can manually copy the binary to the board, which you mount on the host computer over USB.
-The binary is located at `./BUILD/<TARGET>/<TOOLCHAIN>/mbed-os-example-aws.bin`.
+The binary is located at `./BUILD/<TARGET>/<TOOLCHAIN>/mbed-os-example-for-aws.bin`.
 
 Depending on the target, you can build the example project with the `GCC_ARM` or `ARM` toolchain. Run the command below to determine which toolchain supports your target:
 
