@@ -1,0 +1,15 @@
+[INFO][Main]: Connecting to the network...
+[INFO][Main]: Connection Success
+[INFO][TLSW]: Certificate verification passed
+[INFO][Main]: sending warning message: Warning: Only 10 second(s) left to say your name !
+[INFO][Main]: sending warning message: Warning: Only 9 second(s) left to say your name !
+[INFO][Main]: sending warning message: Warning: Only 8 second(s) left to say your name !
+[INFO][Main]: sending warning message: Warning: Only 7 second(s) left to say your name !
+[INFO][Main]: sending warning message: Warning: Only 6 second(s) left to say your name !
+[INFO][Main]: sending warning message: Warning: Only 5 second(s) left to say your name !
+[INFO][Main]: sending warning message: Warning: Only 4 second(s) left to say your name !
+[INFO][Main]: sending warning message: Warning: Only 3 second(s) left to say your name !
+[INFO][Main]: sending warning message: Warning: Only 2 second(s) left to say your name !
+[INFO][Main]: sending warning message: Warning: Only 1 second(s) left to say your name !
+[INFO][TLSW]: Closing TLS
+[INFO][Main]: Done
