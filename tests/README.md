@@ -4,7 +4,7 @@ Examples are tested using tool [htrun](https://github.com/ARMmbed/mbed-os-tools/
 
 To run the test, use following command after you build the example:
 ```
-mbedhtrun -d D: -p COM4 -m K64F -f .\BUILD\K64F\GCC_ARM\mbed-os-example-for-aws.bin --compare-log tests\aws.log
+mbedhtrun -d D: -p COM4 -m K64F -f .\BUILD\K64F\GCC_ARM\mbed-os-example-for-aws.bin --compare-log tests\aws.log --baud-rate=115200 --sync=0
 ```
 
 
