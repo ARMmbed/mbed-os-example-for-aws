@@ -164,8 +164,6 @@ int main()
     IotSdk_Cleanup();
 
     tr_info("Done");
-    while (true) {
-        ThisThread::sleep_for(1000);
-    }
+
     return 0;
 }
