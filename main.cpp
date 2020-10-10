@@ -41,7 +41,8 @@ static void on_message_received(void * pCallbackContext, IotMqttCallbackParam_t 
     auto payloadLen = pCallbackParam->u.message.info.payloadLength;
     tr_debug("from topic:%s; msg: %.*s", pCallbackParam->u.message.info.pTopicName, payloadLen, payload);
 
-    if (strncmp("Warning", payload, 7) != 0) {
+    static const char myPayloadStart[] ="{\"type\": \"request\"";
+    if (strncmp(myPayloadStart, payload, strlen(myPayloadStart)) != 0) {
         tr_info("Hello %.*s !", payloadLen, payload);
         wait_sem->release();
     }
@@ -143,8 +144,8 @@ int main()
         }
 
         /* prepare the message */
-        static char message[64];
-        snprintf(message, 64, "Warning: Only %lu second(s) left to say your name !", 10 - i);
+        static char message[128];
+        snprintf(message, 128, "{\"type\": \"request\", \"message\": \"Warning: Only %lu second(s) left to say your name !\"}", 10 - i);
         publish.pPayload = message;
         publish.payloadLength = strlen(message);
 
@@ -164,6 +165,5 @@ int main()
     IotSdk_Cleanup();
 
     tr_info("Done");
-
     return 0;
 }
