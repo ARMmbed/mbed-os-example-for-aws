@@ -23,12 +23,6 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
     $ mbed import mbed-os-example-for-aws && cd mbed-os-example-for-aws
     ```
 
-
-# Project structure
-- Establish AWS IoT Core service
-- Set up sensors on the board and send readings to the cloud
-- Analyze data on cloud and send directive to board
-
 # Establishing AWS IoT Core service
 
 1. Create an AWS account if you don’t have one, and login to it.
