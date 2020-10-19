@@ -1,13 +1,13 @@
-![](./resources/official_armmbed_example_badge.png)
-
 # Mbed OS example for AWS cloud
-
 The example project is part of the [Arm Mbed OS Official Examples](https://os.mbed.com/code/). It contains an application that connects to an AWS MQTT broker and publishes a message every 1 second for 10 seconds or until a message is received.
 
 You can build the project with all supported [Mbed OS build tools](https://os.mbed.com/docs/mbed-os/latest/tools/index.html). However, this example project specifically refers to the command-line interface tool [Arm Mbed CLI](https://github.com/ARMmbed/mbed-cli#installing-mbed-cli).
-(Note: To see a rendered example you can import into the Arm Online Compiler, please see our [import quick start](https://os.mbed.com/docs/mbed-os/latest/quick-start/online-with-the-online-compiler.html#importing-the-code).)
 
-## Downloading this project
+**Note**: To see a rendered example you can import into the Arm Online Compiler, please see our [import quick start](https://os.mbed.com/docs/mbed-os/v6.3/quick-start/build-with-the-online-compiler.html#importing-the-code).
+
+
+# Downloading this project
+
 1. [Install Mbed CLI](https://os.mbed.com/docs/mbed-os/latest/quick-start/offline-with-mbed-cli.html).
 
 1. Clone this repository on your system, and change the current directory to where the project was cloned:
@@ -24,21 +24,55 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
     ```
 
 
-## Configuring the AWS IoT Core service
+# Project structure
+- Establish AWS IoT Core service
+- Set up sensors on the board and send readings to the cloud
+- Analyze data on cloud and send directive to board
 
-1. Create an AWS account if you don't have one, and login to it.
+# Establishing AWS IoT Core service
 
-    __NOTE:__ If you have an admin for your AWS account, please contact them to add a user to the account. You should obtain your login credentials from your admin in this case.
+1. Create an AWS account if you don’t have one, and login to it.
 
-1. Set up device credentials and policy via the AWS IoT console. You can refer to the AWS documentation [here](https://docs.aws.amazon.com/iot/latest/developerguide/iot-gs.html). Follow the steps there to
+	**NOTE**: If you have an admin for your AWS account, please contact them to add a user to the account. You should obtain your login credentials from your admin in this case.
 
-    * create a thing
-    * generate a device certificate and keys
-    * create an IoT policy and attach that policy to your device.
+
+2. Set up device credentials and policy via the AWS IoT console. You can refer to the AWS documentation [here](https://docs.aws.amazon.com/iot/latest/developerguide/iot-gs.html). After having logged into your AWS account. Follow the steps there to
+    1. Create an IoT policy
+     - Click on **IoT Core**
+      ![AWS_Core](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/step1-IoT_Core.jpg)
+     - On the left panel click on **Secure > Policies**
+      ![AWS_Core](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/secure_policies_pic2.jpg)
+     - Click on **Create**
+      ![Create Policies](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/step7-create-policy.jpg)
+     - Click on **Advanced mode**
+      ![Policies](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/creating_policy_click_advanced_mode.jpg)
+     - Fill in your policy as shown below then click **Create**
+      ![Policies](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/aws_policy_advanced_mode_example.jpg)
+      **note:** you will need to substitute the **Resource** value above with your actual value from your **Thing** (which we will create next) by editing the policy after registering your **Thing**.
+      
+    2. Register a **Thing** 
+     - Click on **Manage > Things > Create**
+      ![Things](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/step2-Things-Create.jpg)
+     - Click on **Create a single thing**
+      ![Create](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/step3-create-single-thing.jpg)
+     - Fill in registry 
+      ![step4](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/create_thing.jpg)
+      **note**: no need to specify a type
+      
+    3. Generate a device certificate and keys
+     - Click on **Create certificate**
+      ![step4](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/certificate_option.jpg)
+     - Download the public key, private key, and the certificate for this **Thing** then click on **Activate**
+      ![step4](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/download_certificates.jpg)
+     - Click on **Attach a policy**
+      ![step4](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/attach_policies.jpg)
+     - Ensure the correct policy is selected then click on **Register Thing**
+      ![step4](https://raw.githubusercontent.com/COTASPAR/AWS_base_guide/master/images/attach_policy_register_thing.jpg)
+
 
     Also download "Amazon Root CA 1" from [here](https://docs.aws.amazon.com/iot/latest/developerguide/server-authentication.html#server-authentication-certs).
 
-    Once you have downloaded the credentials, you will need to place them in the [`aws_credentials.h`](./aws_credentials.h) file of this example.
+    Once you have downloaded the credentials, you will need to place them in the [`aws_credentials.h`](https://github.com/ARMmbed/mbed-os-example-for-aws/blob/master/aws_credentials.h) file of this example.
     
     The example includes a python script to automate converting the credentials you downloaded from AWS into C-compatible arrays/strings. First, create a new folder in the project to store your credential files, eg: `mkdir aws-credentials`. Copy the previously-downloaded credential files into this subdirectory.
     
@@ -52,15 +86,15 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
     
     The above command will read your credential files and place them into a C header file for you: `aws_credentials.h`
 
-1. Once you have created the "thing", you will need to obtain the custom endpoint name from the console. At the time of writing this document, you can find it under "Settings" in the IoT console.
+3. Once you have created the "thing", you will need to obtain the custom endpoint name from the console. At the time of writing this document, you can find it under "Settings" in the IoT console.
 
     In [`mbed_app.json`](./mbed_app.json) file, set `aws-endpoint.value` to be that of the custom endpoint.
 
-1. Set a topic that both your device and the cloud can publish messages to.
+4. Set a topic that both your device and the cloud can publish messages to.
 
    In [`mbed_app.json`](./mbed_app.json) file, set `aws-mqtt-topic.value` to a name you prefer, or use the default one. On the AWS console, you will then need to subscribe to the same topic name. At the time of writing this document, you can find this under "Test" on the console.
 
-1. Give your device a name by setting `aws-client-identifier` in [`mbed_app.json`](./mbed_app.json).
+5. Give your device a name by setting `aws-client-identifier` in [`mbed_app.json`](./mbed_app.json).
 
 ## Building and running
 
