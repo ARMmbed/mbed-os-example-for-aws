@@ -157,6 +157,15 @@ int main()
         }
     }
 
+    /* Unubscribe to the topic. */
+    auto unsub_status =  IotMqtt_UnsubscribeSync(connection, &subscription,
+                                                 /* subscription count */ 1, /* flags */ 0,
+                                                 /* timeout ms */ MQTT_TIMEOUT_MS );
+
+    if (unsub_status != IOT_MQTT_SUCCESS) {
+        tr_error("AWS Sdk: Unsubscribe failed with : %u", unsub_status);
+    }
+
     /* Close the MQTT connection. */
     IotMqtt_Disconnect(connection, 0);
 
