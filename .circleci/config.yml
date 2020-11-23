@@ -15,4 +15,7 @@ jobs:
           cd mbed-os-example-for-aws
           mbed deploy
           mbed compile -t GCC_ARM -m K64F
+          mbed compile -t GCC_ARM -m DISCO_L475VG_IOT01A
+          mbed compile -t GCC_ARM -m NUCLEO_F429ZI
+          mbed compile -t GCC_ARM -m EP_AGORA
 
