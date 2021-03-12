@@ -30,6 +30,8 @@ target_include_directories(${APP_TARGET}
 target_sources(${APP_TARGET}
     PRIVATE
         main.cpp
+        demo_mqtt.cpp
+        demo_shadow.cpp
 )
 
 if("-DMBED_CONF_ISM43362_PROVIDE_DEFAULT=1" IN_LIST MBED_CONFIG_DEFINITIONS)

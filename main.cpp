@@ -1,178 +1,137 @@
 /*
- * Copyright (c) 2020 Arm Limited
+ * Copyright (c) 2020-2021 Arm Limited
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "mbed.h"
-#include "mbed_trace.h"
-#include "mbedtls/debug.h"
+#include "mbed-trace/mbed_trace.h"
+#include "rtos/Mutex.h"
+#include "rtos/Thread.h"
+#include "rtos/ThisThread.h"
+#include "AWSClient/AWSClient.h"
 #include "aws_credentials.h"
 
 extern "C" {
-// sdk initialization
-#include "iot_init.h"
-// mqtt methods
-#include "iot_mqtt.h"
+#include "core_json.h"
 }
 
-// debugging facilities
 #define TRACE_GROUP "Main"
-static Mutex trace_mutex;
-static void trace_mutex_lock()
+
+// Implemented by the two demos
+void on_message_callback(
+    const char *topic,
+    uint16_t topic_length,
+    const void *payload,
+    size_t payload_length
+);
+void demo();
+
+rtos::Mutex connection_mutex;
+
+// Task to process MQTT responses at a regular interval
+static void process_responses()
 {
-    trace_mutex.lock();
-}
-static void trace_mutex_unlock()
-{
-    trace_mutex.unlock();
-}
-extern "C" void aws_iot_puts(const char *msg) {
-    trace_mutex_lock();
-    puts(msg);
-    trace_mutex_unlock();
-}
-
-#define MQTT_TIMEOUT_MS    15000
-
-// subscription event handler
-static void on_message_received(void * pCallbackContext, IotMqttCallbackParam_t *pCallbackParam) {
-    auto wait_sem = static_cast<Semaphore*>(pCallbackContext);
-    char* payload = (char*)pCallbackParam->u.message.info.pPayload;
-    auto payloadLen = pCallbackParam->u.message.info.payloadLength;
-    tr_debug("from topic:%s; msg: %.*s", pCallbackParam->u.message.info.pTopicName, payloadLen, payload);
-
-    if (strncmp("Warning", payload, 7) != 0) {
-        tr_info("Hello %.*s !", payloadLen, payload);
-        wait_sem->release();
-    }
-}
-int main()
-{
-    mbed_trace_mutex_wait_function_set( trace_mutex_lock ); // only if thread safety is needed
-    mbed_trace_mutex_release_function_set( trace_mutex_unlock ); // only if thread safety is needed
-    mbed_trace_init();
-
-    tr_info("Connecting to the network...");
-    auto eth = NetworkInterface::get_default_instance();
-    if (eth == NULL) {
-        tr_error("No Network interface found.");
-        return -1;
-    }
-    auto ret = eth->connect();
-    if (ret != 0) {
-        tr_error("Connection error: %x", ret);
-        return -1;
-    }
-    tr_info("MAC: %s", eth->get_mac_address());
-    tr_info("Connection Success");
-
-    // demo :
-    // - Init sdk
-    if (!IotSdk_Init()) {
-        tr_error("AWS Sdk: failed to initialize IotSdk");
-        return -1;
-    }
-    auto init_status = IotMqtt_Init();
-    if (init_status != IOT_MQTT_SUCCESS) {
-        tr_error("AWS Sdk: Failed to initialize IotMqtt with %u", init_status);
-        return -1;
-    }
-    // - Connect to mqtt broker
-    IotMqttNetworkInfo_t network_info = IOT_MQTT_NETWORK_INFO_INITIALIZER;
-    network_info.pNetworkInterface = aws::get_iot_network_interface();
-    // create nework connection
-    network_info.createNetworkConnection = true;
-    network_info.u.setup.pNetworkServerInfo = {
-        .hostname = MBED_CONF_APP_AWS_ENDPOINT,
-        .port = 8883
-    };
-    network_info.u.setup.pNetworkCredentialInfo = {
-        .rootCA = aws::credentials::rootCA,
-        .clientCrt = aws::credentials::clientCrt,
-        .clientKey = aws::credentials::clientKey
-    };
-
-    IotMqttConnectInfo_t connect_info = IOT_MQTT_CONNECT_INFO_INITIALIZER;
-    connect_info.awsIotMqttMode = true; // we are connecting to aws servers
-    connect_info.pClientIdentifier = MBED_CONF_APP_AWS_CLIENT_IDENTIFIER;
-    connect_info.clientIdentifierLength = strlen(MBED_CONF_APP_AWS_CLIENT_IDENTIFIER);
-
-    IotMqttConnection_t connection = IOT_MQTT_CONNECTION_INITIALIZER;
-    auto connect_status = IotMqtt_Connect(&network_info, &connect_info, /* timeout ms */ MQTT_TIMEOUT_MS, &connection);
-    if (connect_status != IOT_MQTT_SUCCESS) {
-        tr_error("AWS Sdk: Connection to the MQTT broker failed with %u", connect_status);
-        return -1;
-    }
-    // - Subscribe to sdkTest/sub
-    //   On message
-    //   - Display on the console: "Hello %s", message
-    /* Set the members of the subscription. */
-    static const char topic[] = MBED_CONF_APP_AWS_MQTT_TOPIC;
-    Semaphore wait_sem {/* count */ 0, /* max_count */ 1};
-
-    IotMqttSubscription_t subscription = IOT_MQTT_SUBSCRIPTION_INITIALIZER;
-    subscription.qos = IOT_MQTT_QOS_1;
-    subscription.pTopicFilter = topic;
-    subscription.topicFilterLength = strlen(topic);
-    subscription.callback.function = on_message_received;
-    subscription.callback.pCallbackContext = &wait_sem;
-
-    /* Subscribe to the topic using the blocking SUBSCRIBE
-     * function. */
-    auto sub_status = IotMqtt_SubscribeSync(connection, &subscription,
-                                            /* subscription count */ 1, /* flags */ 0,
-                                            /* timeout ms */ MQTT_TIMEOUT_MS );
-    if (sub_status != IOT_MQTT_SUCCESS) {
-        tr_error("AWS Sdk: Subscribe failed with : %u", sub_status);
-    }
-
-    /* Set the members of the publish info. */
-    IotMqttPublishInfo_t publish = IOT_MQTT_PUBLISH_INFO_INITIALIZER;
-    publish.qos = IOT_MQTT_QOS_1;
-    publish.pTopicName = topic;
-    publish.topicNameLength = strlen(topic);
-    publish.retryLimit = 3;
-    publish.retryMs = 1000;
-    for (uint32_t i = 0; i < 10; i++) {
-        // - for i in 0..9
-        //  - wait up to 1 sec
-        //  - if no message received Publish: "You have %d sec remaining to say hello...", 10-i
-        //  - other wise, exit
-        if (wait_sem.try_acquire_for(1000)) {
+    AWSClient &client = AWSClient::getInstance();
+    while (true) {
+        connection_mutex.lock(); // avoid AWSClient::disconnect() while processing
+        if (!client.isConnected()) {
+            connection_mutex.unlock();
             break;
         }
+        if (client.processResponses() != MBED_SUCCESS) {
+            tr_error("AWSClient::processResponses() failed");
+        }
+        connection_mutex.unlock();
+        rtos::ThisThread::sleep_for(10ms);
+    }
+}
 
-        /* prepare the message */
-        static char message[64];
-        snprintf(message, 64, "Warning: Only %lu second(s) left to say your name !", 10 - i);
-        publish.pPayload = message;
-        publish.payloadLength = strlen(message);
+int main()
+{
+    // "goto" requires early initialization of variables
+    AWSClient &client = AWSClient::getInstance();
+    rtos::Thread process_thread;
+    AWSClient::TLSCredentials_t credentials;
+    int ret;
 
-        /* Publish the message. */
-        tr_info("sending warning message: %s", message);
-        auto pub_status = IotMqtt_PublishSync(connection, &publish,
-                                              /* flags */ 0, /* timeout ms */ MQTT_TIMEOUT_MS);
-        if (pub_status != IOT_MQTT_SUCCESS) {
-            tr_warning("AWS Sdk: failed to publish message with %u.", pub_status);
+    mbed_trace_init();
+    tr_info("Connecting to the network...");
+    auto network = NetworkInterface::get_default_instance();
+    if (network == NULL) {
+        tr_error("No network interface found");
+        goto end;
+    }
+    ret = network->connect();
+    if (ret != 0) {
+        tr_error("Connection error: %x", ret);
+        goto end;
+    }
+    tr_info("MAC: %s", network->get_mac_address());
+    tr_info("Connection Success");
+
+    // Set credentials
+    credentials.clientCrt = aws::credentials::clientCrt;
+    credentials.clientCrtLen = sizeof(aws::credentials::clientCrt);
+    credentials.clientKey = aws::credentials::clientKey;
+    credentials.clientKeyLen = sizeof(aws::credentials::clientKey);
+    credentials.rootCrtMain = aws::credentials::rootCA;
+    credentials.rootCrtMainLen = sizeof(aws::credentials::rootCA);
+
+    // Initialize client
+    ret = client.init(
+              on_message_callback,
+              credentials
+          );
+    if (ret != MBED_SUCCESS) {
+        tr_error("AWSClient::init() failed");
+        goto disconnect;
+    }
+
+    // Connect to AWS IoT Core
+    ret = client.connect(
+              network,
+              credentials,
+              MBED_CONF_APP_AWS_ENDPOINT,
+              MBED_CONF_APP_AWS_CLIENT_IDENTIFIER
+          );
+    if (ret != MBED_SUCCESS) {
+        tr_error("AWSClient::connect() failed");
+        goto disconnect;
+    }
+
+    // Start a background thread to process MQTT
+    ret = process_thread.start(process_responses);
+    if (ret != osOK) {
+        tr_error("Failed to start thread to process MQTT");
+        goto disconnect;
+    }
+
+    // Run a demo depending on the configuration in mbed_app.json:
+    // * demo_mqtt.cpp if aws-client.shadow is unset or false
+    // * demo_shadow.cpp if aws-client.shadow is true
+    demo();
+
+disconnect:
+    if (client.isConnected()) {
+        connection_mutex.lock();
+        ret = client.disconnect();
+        connection_mutex.unlock();
+        if (ret != MBED_SUCCESS) {
+            tr_error("AWS::disconnect() failed");
         }
     }
 
-    /* Unubscribe to the topic. */
-    auto unsub_status =  IotMqtt_UnsubscribeSync(connection, &subscription,
-                                                 /* subscription count */ 1, /* flags */ 0,
-                                                 /* timeout ms */ MQTT_TIMEOUT_MS );
-
-    if (unsub_status != IOT_MQTT_SUCCESS) {
-        tr_error("AWS Sdk: Unsubscribe failed with : %u", unsub_status);
+    // The process thread should finish on disconnection
+    ret = process_thread.join();
+    if (ret != osOK) {
+        tr_error("Failed to join thread");
     }
 
-    /* Close the MQTT connection. */
-    IotMqtt_Disconnect(connection, 0);
+    ret = network->disconnect();
+    if (ret != MBED_SUCCESS) {
+        tr_error("NetworkInterface::disconnect() failed");
+    }
 
-    IotMqtt_Cleanup();
-    IotSdk_Cleanup();
-
-    tr_info("Done");
-
-    return 0;
+end:
+    tr_info("End of the demo");
 }
