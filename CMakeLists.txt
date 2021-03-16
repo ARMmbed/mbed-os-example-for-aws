@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.19.0 FATAL_ERROR)
 
 set(MBED_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mbed-os CACHE INTERNAL "")
-set(MBED_CONFIG_PATH ${CMAKE_CURRENT_SOURCE_DIR}/.mbedbuild CACHE INTERNAL "")
+set(MBED_CONFIG_PATH ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "")
 set(APP_TARGET mbed-os-example-for-aws)
 
 include(${MBED_PATH}/tools/cmake/app.cmake)
@@ -12,15 +12,13 @@ include(${MBED_PATH}/tools/cmake/app.cmake)
 add_subdirectory(${MBED_PATH})
 add_subdirectory(mbed-client-for-aws)
 
-if("wifi_ism43362" IN_LIST MBED_TARGET_LABELS)
+if("-DMBED_CONF_ISM43362_PROVIDE_DEFAULT=1" IN_LIST MBED_CONFIG_DEFINITIONS)
     add_subdirectory(wifi-ism43362)
 endif()
 
 add_executable(${APP_TARGET})
 
 mbed_configure_app_target(${APP_TARGET})
-
-mbed_set_mbed_target_linker_script(${APP_TARGET})
 
 project(${APP_TARGET})
 
@@ -34,7 +32,7 @@ target_sources(${APP_TARGET}
         main.cpp
 )
 
-if("wifi_ism43362" IN_LIST MBED_TARGET_LABELS)
+if("-DMBED_CONF_ISM43362_PROVIDE_DEFAULT=1" IN_LIST MBED_CONFIG_DEFINITIONS)
     target_link_libraries(${APP_TARGET}
         PRIVATE
             wifi-ism43362
@@ -44,8 +42,6 @@ endif()
 target_link_libraries(${APP_TARGET}
     PRIVATE
         mbed-os
-        mbed-netsocket
-        mbed-mbedtls
         mbed-client-for-aws
 )
 
