@@ -7,22 +7,18 @@ The example project is part of the [Arm Mbed OS Official Examples](https://os.mb
 You can build the project with all supported [Mbed OS build tools](https://os.mbed.com/docs/mbed-os/latest/tools/index.html). However, this example project specifically refers to the command-line interface tool [Arm Mbed CLI](https://github.com/ARMmbed/mbed-cli#installing-mbed-cli).
 (Note: To see a rendered example you can import into the Arm Online Compiler, please see our [import quick start](https://os.mbed.com/docs/mbed-os/latest/quick-start/online-with-the-online-compiler.html#importing-the-code).)
 
-## Downloading this project
-1. [Install Mbed CLI](https://os.mbed.com/docs/mbed-os/latest/quick-start/offline-with-mbed-cli.html).
+## Mbed OS build tools
 
-1. Clone this repository on your system, and change the current directory to where the project was cloned:
+### Mbed CLI 2
+Starting with version 6.5, Mbed OS uses Mbed CLI 2. It uses Ninja as a build system, and CMake to generate the build environment and manage the build process in a compiler-independent manner. If you are working with Mbed OS version prior to 6.5 then check the section [Mbed CLI 1](#mbed-cli-1).
+1. [Install Mbed CLI 2](https://os.mbed.com/docs/mbed-os/latest/build-tools/install-or-upgrade.html).
+1. From the command-line, import the example: `mbed-tools import mbed-os-example-for-aws`
+1. Change the current directory to where the project was imported.
 
-    ```
-    $ git clone https://github.com/ARMmbed/mbed-os-example-for-aws.git && cd mbed-os-example-for-aws
-    $ mbed deploy
-    ```
-
-    Alternatively, you can download the example project with Arm Mbed CLI using the `import` subcommand:
-
-    ```
-    $ mbed import mbed-os-example-for-aws && cd mbed-os-example-for-aws
-    ```
-
+### Mbed CLI 1
+1. [Install Mbed CLI 1](https://os.mbed.com/docs/mbed-os/latest/quick-start/offline-with-mbed-cli.html).
+1. From the command-line, import the example: `mbed import mbed-os-example-for-aws`
+1. Change the current directory to where the project was imported.
 
 ## Configuring the AWS IoT Core service
 
@@ -71,12 +67,23 @@ You can build the project with all supported [Mbed OS build tools](https://os.mb
 1. Connect a USB cable between the USB port on the board and the host computer.
 
 1. <a name="build_cmd"></a> Run the following command to build the example project, program the microcontroller flash memory, and open a serial terminal:
+
+    * Mbed CLI 2
+
+    ```bash
+    $ mbed-tools compile -m <TARGET> -t <TOOLCHAIN> --flash --sterm --baudrate=115200
     ```
-    $ mbed compile -m detect -t <TOOLCHAIN> --flash --sterm --baud 115200
+
+    * Mbed CLI 1
+
+    ```bash
+    $ mbed compile -m <TARGET> -t <TOOLCHAIN> --flash --sterm --baudrate=115200
     ```
 
 Alternatively, you can manually copy the binary to the board, which you mount on the host computer over USB.
-The binary is located at `./BUILD/<TARGET>/<TOOLCHAIN>/mbed-os-example-for-aws.bin`.
+The binary is located at:
+* **Mbed CLI 2** - `./cmake_build/<TARGET>/<PROFILE>/<TOOLCHAIN>/mbed-os-example-for-aws.bin`</br>
+* **Mbed CLI 1** - `./BUILD/<TARGET>/<TOOLCHAIN>/mbed-os-example-for-aws.bin`
 
 Depending on the target, you can build the example project with the `GCC_ARM` or `ARM` toolchain. Run the command below to determine which toolchain supports your target:
 
