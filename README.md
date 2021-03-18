@@ -2,7 +2,9 @@
 
 # Mbed OS example for AWS cloud
 
-The example project is part of the [Arm Mbed OS Official Examples](https://os.mbed.com/code/). It contains an application that connects to an AWS MQTT broker and publishes a message every 1 second for 10 seconds or until a message is received.
+The example project is part of the [Arm Mbed OS Official Examples](https://os.mbed.com/code/). It contains two demos:
+* MQTT (default): publishes a message every 1 second for 10 messages or until a message is received.
+* Device Shadow service: retrieves a desired value from the cloud, then reports a string value and then an integer value to the cloud.
 
 You can build the project with all supported [Mbed OS build tools](https://os.mbed.com/docs/mbed-os/latest/tools/index.html). However, this example project specifically refers to the command-line interface tool [Arm Mbed CLI](https://github.com/ARMmbed/mbed-cli#installing-mbed-cli).
 (Note: To see a rendered example you can import into the Arm Online Compiler, please see our [import quick start](https://os.mbed.com/docs/mbed-os/latest/quick-start/online-with-the-online-compiler.html#importing-the-code).)
@@ -60,6 +62,8 @@ Starting with version 6.5, Mbed OS uses Mbed CLI 2. It uses Ninja as a build sys
 
 ## Building and running
 
+### MQTT demo (default)
+
 1. If using WiFi (e.g. on DISCO_L475VG_IOT01A), enter your network's SSID and password in [`mbed_app.json`](./mbed_app.json) (see [here](https://github.com/ARMmbed/mbed-os-example-wifi/blob/master/README.md#getting-started)). Keep any existing `\"`s. (If you use a different WiFi-enabled target, you may need to manually import its WiFi driver as described [here](https://github.com/ARMmbed/mbed-os-example-wifi#supported-hardware).)
 
 1. For Ethernet (e.g on K64F), connect a cable to the port.
@@ -91,34 +95,62 @@ Depending on the target, you can build the example project with the `GCC_ARM` or
 $ mbed compile -S
 ```
 
+### Device Shadow demo
+
+Before running this demo, go to the AWS IoT Core console. In _Test_ -> _Subscribe to a topic_, subscribe to `$aws/things/<your thing>/shadow/#` (the `#` is a wildcard) on the AWS to monitor all Device Shadow updates. Then in _Publish to a topic_, publish to `$aws/things/<your thing>/shadow/update` the following payload:
+
+```json
+{
+  "state": {
+    "desired": {
+      "DemoNumber": 200
+    }
+  }
+}
+```
+
+Build with the same steps as the MQTT demo, but also set `aws-client.shadow` to `true` in [`mbed_app.json`](./mbed_app.json) before compilation.
+
 ## Expected output
+
+### MQTT demo (default)
 
 Once the example starts to run, you can [monitor a serial terminal](https://os.mbed.com/docs/mbed-os/v6.0/tutorials/serial-comm.html) to see that the device connects to your network, exchanges some TLS handshakes, connects to AWS and publishes to the topic you just subscribed. This can be seen on the AWS console as incoming messages.
 
 The application publishes a message every second for 10 seconds, or until it receives a message from the cloud:
 ```
-[INFO][Main]: sending warning message: Warning: Only 10 second(s) left to say your name !
-[INFO][Main]: sending warning message: Warning: Only 9 second(s) left to say your name !
-[INFO][Main]: sending warning message: Warning: Only 8 second(s) left to say your name !
-[INFO][Main]: sending warning message: Warning: Only 7 second(s) left to say your name !
+[INFO][Main]: Publishing "10 messages left to send, or until we receive a reply" to topic <your topic>
+[INFO][Main]: Message sent successfully
+[INFO][Main]: Publishing "9 messages left to send, or until we receive a reply" to topic <your topic>
+[INFO][Main]: Message sent successfully
+[INFO][Main]: Publishing "8 messages left to send, or until we receive a reply" to topic <your topic>
+[INFO][Main]: Message sent successfully
 ```
 
-You can send a message to your device via the AWS IoT console (Test -> Publish to a topic). Use the same topic name you set in `aws-mqtt-topic.value` in [`mbed_app.json`](./mbed_app.json).
+You can send a message to your device via the AWS IoT Core console (_Test_ -> _Publish to a topic_). Use the same topic name you set in `aws-mqtt-topic.value` in [`mbed_app.json`](./mbed_app.json). Use the existing JSON structure and set "message" to one you want to send.
 
-On receipt of a message, the application displays on the console the message prefixed with `Hello␣`.
+On receipt of a message, the application displays on the console the message you sent via the AWS IoT Core console.
+
+### Device Shadow demo
+
+The following will be printed to the serial:
+```
+[INFO][Main]: Device Shadow document downloaded
+[INFO][Main]: Desired value of DemoNumber: <value set on the AWS console>
+[INFO][Main]: Device Shadow reported string value published
+[INFO][Main]: Device Shadow reported integer value published
+```
 
 ## Troubleshooting
 If you have problems, you can review the [documentation](https://os.mbed.com/docs/latest/tutorials/debugging.html) for suggestions on what could be wrong and how to fix it.
 
 ## Related Links
 
-* [Mbed OS Stats API](https://os.mbed.com/docs/latest/apis/mbed-statistics.html).
+* [Mbed client for AWS IoT Core](https://github.com/ARMmbed/mbed-client-for-aws)
+* [AWS IoT Core](https://aws.amazon.com/iot-core/)
 * [Mbed OS Configuration](https://os.mbed.com/docs/latest/reference/configuration.html).
 * [Mbed OS Serial Communication](https://os.mbed.com/docs/latest/tutorials/serial-communication.html).
-* [Mbed OS bare metal](https://os.mbed.com/docs/mbed-os/latest/reference/mbed-os-bare-metal.html).
 * [Mbed boards](https://os.mbed.com/platforms/).
-* [AWS IoT Core](https://aws.amazon.com/iot-core/)
-* [AWS IoT Core - Embedded C SDK](https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/v4_beta)
 
 ### License and contributions
 
