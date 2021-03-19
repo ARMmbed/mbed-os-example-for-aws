@@ -78,10 +78,14 @@ matrix:
         - pip install future==0.16.0
         - pip install "Jinja2>=2.10.1,<2.11"
         - pip install "intelhex>=1.3,<=2.2.1"
+        # Fetch mbed-os: We use manual clone, with depth=1 and --single-branch to save time.
+        - >-
+          git clone --depth=1 --single-branch https://github.com/ARMmbed/mbed-os.git;
+        - >-
       script:
-        - mbedtools checkout
-        - echo mbedtools build -t GCC_ARM -m ${TARGET_NAME} -b ${PROFILE}
-        - mbedtools build -t GCC_ARM -m ${TARGET_NAME} -b ${PROFILE}
+        - mbedtools deploy
+        - echo mbedtools compile -t GCC_ARM -m ${TARGET_NAME} -b ${PROFILE}
+        - mbedtools compile -t GCC_ARM -m ${TARGET_NAME} -b ${PROFILE}
         - ccache -s
 
     - <<: *cmake-build-test
