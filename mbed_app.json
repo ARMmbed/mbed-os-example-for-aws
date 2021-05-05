@@ -1,7 +1,7 @@
 {
     "config": {
         "aws-endpoint": {
-            "help": "Endpoint name",
+            "help": "Endpoint URL",
             "value": "\"… .iot. … .amazonaws.com\""
         },
         "aws-mqtt-topic": {
@@ -9,7 +9,7 @@
             "value": "\"sdkTest/sub\""
         },
         "aws-client-identifier": {
-            "help": "uniq id for this thing",
+            "help": "Unique identifier for the thing",
             "value": "\"...\""
         }
     },
