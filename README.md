@@ -50,7 +50,7 @@ Starting with version 6.5, Mbed OS uses Mbed CLI 2. It uses Ninja as a build sys
     
     The above command will read your credential files and place them into a C header file for you: `aws_credentials.h`
 
-1. Once you have created the "thing", you will need to obtain the custom endpoint name from the console. At the time of writing this document, you can find it under "Settings" in the IoT console.
+1. Once you have created the "thing", you will need to obtain the custom endpoint URL from the console. At the time of writing this document, you can find it under "Settings" in the IoT console.
 
     In [`mbed_app.json`](./mbed_app.json) file, set `aws-endpoint.value` to be that of the custom endpoint.
 
